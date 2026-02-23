@@ -83,6 +83,7 @@ class SplitPicApp {
             colsInput: document.getElementById('colsInput'),
             formatSelect: document.getElementById('formatSelect'),
             qualitySelect: document.getElementById('qualitySelect'),
+            autoTrimCheckbox: document.getElementById('autoTrimCheckbox'),
             processBtn: document.getElementById('processBtn'),
             resetBtn: document.getElementById('resetBtn'),
 
@@ -419,6 +420,7 @@ class SplitPicApp {
             const cols = parseInt(this.elements.colsInput.value);
             const format = this.elements.formatSelect.value;
             const quality = parseFloat(this.elements.qualitySelect.value);
+            const autoTrim = this.elements.autoTrimCheckbox.checked;
 
             // 验证输入
             if (rows < 1 || rows > 20 || cols < 1 || cols > 20) {
@@ -426,10 +428,26 @@ class SplitPicApp {
                 return;
             }
 
-            showLoading(true, `正在切割图片 (${rows}×${cols})...`);
+            const message = autoTrim
+                ? `正在切割图片 (${rows}×${cols}) 并裁剪空白...`
+                : `正在切割图片 (${rows}×${cols})...`;
 
-            // 执行切割
-            this.cuttingResults = await this.imageProcessor.cutImage(rows, cols, format, quality);
+            showLoading(true, message);
+
+            // 执行切割，带进度回调
+            this.cuttingResults = await this.imageProcessor.cutImage(
+                rows,
+                cols,
+                format,
+                quality,
+                autoTrim,
+                (progress) => {
+                    const loadingText = document.querySelector('.loading-overlay p');
+                    if (loadingText) {
+                        loadingText.textContent = `正在处理... ${Math.round(progress)}%`;
+                    }
+                }
+            );
 
             // 显示切割结果
             this.showCuttingResults();

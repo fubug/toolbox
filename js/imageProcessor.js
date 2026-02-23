@@ -57,9 +57,11 @@ class ImageProcessor {
      * @param {number} cols - 列数
      * @param {string} format - 输出格式
      * @param {number} quality - 输出质量 (0-1)
+     * @param {boolean} autoTrim - 是否自动裁剪空白边缘
+     * @param {Function} onProgress - 进度回调函数
      * @returns {Promise<Array>} 切割结果数组
      */
-    async cutImage(rows, cols, format = 'png', quality = 0.9) {
+    async cutImage(rows, cols, format = 'png', quality = 0.9, autoTrim = false, onProgress = null) {
         if (!this.image) {
             throw new Error('没有加载图片');
         }
@@ -70,15 +72,34 @@ class ImageProcessor {
 
         this.cuttingResults = [];
         const mimeType = getImageMimeType(format);
+        const totalPieces = rows * cols;
 
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
-                const canvas = this.createPieceCanvas(
+                let canvas = this.createPieceCanvas(
                     pieceWidth,
                     pieceHeight,
                     col * pieceWidth,
                     row * pieceHeight
                 );
+
+                let finalWidth = pieceWidth;
+                let finalHeight = pieceHeight;
+
+                // 自动裁剪空白边缘
+                if (autoTrim) {
+                    const bounds = this.detectContentBounds(canvas, 240);
+
+                    // 如果检测到内容边界且需要裁剪
+                    if (bounds && (bounds.width < canvas.width || bounds.height < canvas.height)) {
+                        // 确保裁剪后尺寸不会太小
+                        if (bounds.width >= 10 && bounds.height >= 10) {
+                            canvas = this.trimCanvas(canvas, bounds);
+                            finalWidth = bounds.width;
+                            finalHeight = bounds.height;
+                        }
+                    }
+                }
 
                 const dataUrl = canvas.toDataURL(mimeType, quality);
 
@@ -87,12 +108,18 @@ class ImageProcessor {
                     row: row,
                     col: col,
                     dataUrl: dataUrl,
-                    width: pieceWidth,
-                    height: pieceHeight,
+                    width: finalWidth,
+                    height: finalHeight,
                     index: row * cols + col,
-                    totalPieces: rows * cols,
+                    totalPieces: totalPieces,
                     format: format
                 });
+
+                // 报告进度
+                if (onProgress) {
+                    const progress = ((row * cols + col + 1) / totalPieces) * 100;
+                    onProgress(progress);
+                }
             }
         }
 
@@ -316,6 +343,139 @@ class ImageProcessor {
             width: Math.round(width),
             height: Math.round(height)
         };
+    }
+
+    /**
+     * 判断像素是否为空白（透明或浅色）
+     * @param {number} r - 红色值 (0-255)
+     * @param {number} g - 绿色值 (0-255)
+     * @param {number} b - 蓝色值 (0-255)
+     * @param {number} a - 透明度 (0-255)
+     * @param {number} threshold - 浅色阈值 (0-255)
+     * @returns {boolean} 是否为空白像素
+     */
+    isEmptyPixel(r, g, b, a, threshold) {
+        // 透明像素
+        if (a < 10) return true;
+        // 浅色像素（接近白色）
+        if (a > 250 && r > threshold && g > threshold && b > threshold) return true;
+        return false;
+    }
+
+    /**
+     * 检测 canvas 中非空白内容的边界
+     * @param {HTMLCanvasElement} canvas - 要检测的 canvas
+     * @param {number} threshold - 浅色阈值 (默认 240)
+     * @returns {Object|null} 内容边界 {top, left, width, height} 或 null（整块都是空白）
+     */
+    detectContentBounds(canvas, threshold = 240) {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const pixels = imageData.data;
+
+        let top = height;
+        let bottom = 0;
+        let left = width;
+        let right = 0;
+
+        const step = 2; // 采样步长，提升性能
+
+        // 从上往下扫描
+        for (let y = 0; y < height; y += step) {
+            for (let x = 0; x < width; x += step) {
+                const i = (y * width + x) * 4;
+                if (!this.isEmptyPixel(pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3], threshold)) {
+                    top = Math.min(top, y);
+                    break;
+                }
+            }
+            if (top < height) break; // 找到第一行非空白像素后停止
+        }
+
+        // 从下往上扫描
+        for (let y = height - 1; y >= 0; y -= step) {
+            for (let x = 0; x < width; x += step) {
+                const i = (y * width + x) * 4;
+                if (!this.isEmptyPixel(pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3], threshold)) {
+                    bottom = Math.max(bottom, y);
+                    break;
+                }
+            }
+            if (bottom > 0) break;
+        }
+
+        // 从左往右扫描
+        for (let x = 0; x < width; x += step) {
+            for (let y = 0; y < height; y += step) {
+                const i = (y * width + x) * 4;
+                if (!this.isEmptyPixel(pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3], threshold)) {
+                    left = Math.min(left, x);
+                    break;
+                }
+            }
+            if (left < width) break;
+        }
+
+        // 从右往左扫描
+        for (let x = width - 1; x >= 0; x -= step) {
+            for (let y = 0; y < height; y += step) {
+                const i = (y * width + x) * 4;
+                if (!this.isEmptyPixel(pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3], threshold)) {
+                    right = Math.max(right, x);
+                    break;
+                }
+            }
+            if (right > 0) break;
+        }
+
+        // 如果没有找到任何非空白像素
+        if (top >= height || bottom <= 0 || left >= width || right <= 0) {
+            return null;
+        }
+
+        // 确保边界有效
+        const contentWidth = right - left + 1;
+        const contentHeight = bottom - top + 1;
+
+        if (contentWidth <= 0 || contentHeight <= 0) {
+            return null;
+        }
+
+        return {
+            top: top,
+            left: left,
+            width: contentWidth,
+            height: contentHeight
+        };
+    }
+
+    /**
+     * 根据检测到的边界裁剪 canvas
+     * @param {HTMLCanvasElement} canvas - 要裁剪的 canvas
+     * @param {Object} bounds - 边界信息 {top, left, width, height}
+     * @returns {HTMLCanvasElement} 裁剪后的 canvas
+     */
+    trimCanvas(canvas, bounds) {
+        const trimmedCanvas = document.createElement('canvas');
+        const ctx = trimmedCanvas.getContext('2d');
+
+        trimmedCanvas.width = bounds.width;
+        trimmedCanvas.height = bounds.height;
+
+        // 设置高质量绘制
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // 从原 canvas 复制内容区域
+        ctx.drawImage(
+            canvas,
+            bounds.left, bounds.top, bounds.width, bounds.height,  // 源区域
+            0, 0, bounds.width, bounds.height                       // 目标区域
+        );
+
+        return trimmedCanvas;
     }
 
     /**
