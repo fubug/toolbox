@@ -150,11 +150,11 @@ class UnifiedApp {
      */
     updatePageTitle(tabName) {
         const titles = {
-            split: 'SplitPic - 智能图片切割工具',
-            crop: 'SplitPic - 智能图片裁剪工具',
-            resume: 'SplitPic - 简历导出工具'
+            split: 'ToolBox - 智能图片切割工具',
+            crop: 'ToolBox - 智能图片裁剪工具',
+            resume: 'ToolBox - 简历导出工具'
         };
-        document.title = titles[tabName] || 'SplitPic - 智能图片工具';
+        document.title = titles[tabName] || 'ToolBox - 智能在线工具集';
     }
 
     /**

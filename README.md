@@ -1,13 +1,14 @@
-# SplitPic - 智能图片工具
+# ToolBox - 智能在线工具集
 
-一个高效、易用的Web图片处理工具，集成图片切割和裁剪功能，支持自定义比例切割，保持原图质量，批量下载。
+一个高效、易用的 Web 在线工具集，集成图片切割、图片裁剪和简历导出功能。图片处理支持自定义比例切割、保持原图质量、批量下载；简历导出支持 Markdown 编辑、多模板美化、一键生成 PDF。
 
 ## ✨ 功能特性
 
-### 📷 双重功能
+### 📷 三大功能
 - **✂️ 图片切割**: 支持 1×1 到 20×20 的任意比例切割
 - **✂️ 图片裁剪**: 精确裁剪，支持8向调整、放大镜预览
-- **🔄 标签页切换**: 在切割和裁剪功能间自由切换
+- **📄 简历导出**: Markdown 编写简历，多模板美化，一键导出 PDF
+- **🔄 标签页切换**: 在切割、裁剪和简历功能间自由切换
 
 ### 图片切割功能
 - 🖼️ **多格式支持**: 支持 JPG, PNG, GIF, WebP, BMP, TIFF, SVG 等主流图片格式
@@ -20,6 +21,29 @@
 - 🔍 **放大镜预览**: 4倍放大镜辅助精确裁剪
 - ⌨️ **快捷键支持**: ESC重置、Enter确认裁剪
 - 📐 **实时预览**: 裁剪结果实时显示
+
+### 简历导出功能
+- 📝 **Markdown 编辑**: 使用 Markdown 语法编写简历，简单高效
+- 🎨 **多套模板**: 经典简约、现代双栏、创意卡片三种风格可选
+- 📄 **PDF 导出**: 一键生成 A4 尺寸 PDF，排版专业美观
+- 👁️ **实时预览**: 编辑后即时预览效果，支持模板切换
+
+### 简历导出功能使用说明
+
+#### 1. 编辑简历
+- 在 Markdown 编辑器中输入简历内容
+- 支持标准 Markdown 语法（标题、列表、粗体、分隔线等）
+- 内置示例简历可参考格式
+
+#### 2. 选择模板
+- **经典简约**: 单栏黑白风格，适合传统行业
+- **现代双栏**: 蓝色主题，适合互联网/科技行业
+- **创意卡片**: 紫色渐变标题，适合创意/设计类岗位
+
+#### 3. 预览和导出
+- 点击「预览」按钮查看渲染效果
+- 切换模板实时更新预览样式
+- 点击「导出 PDF」下载 A4 尺寸简历文件
 
 ### 通用特性
 - 🎨 **美观界面**: 现代化响应式设计，支持拖拽上传
@@ -89,9 +113,11 @@ npx serve .  # 或使用 Python, PHP, Live Server 等
 
 - **前端**: HTML5 + CSS3 + JavaScript (ES6+)
 - **图片处理**: Canvas API + File API
+- **简历渲染**: marked.js (Markdown 解析)
+- **PDF 生成**: html2pdf.js (浏览器端 PDF 导出)
 - **UI设计**: CSS Grid + Flexbox（响应式）
-- **架构**: 标签页式双功能应用
-- **依赖库**: 无外部依赖（可选JSZip用于打包下载）
+- **架构**: 标签页式多功能应用
+- **依赖库**: 无硬性依赖（marked.js、html2pdf.js、JSZip 均按需 CDN 加载）
 
 ## 📱 浏览器兼容性
 
@@ -108,6 +134,11 @@ npx serve .  # 或使用 Python, PHP, Live Server 等
 - **异步处理**: 所有图片处理操作都是异步的
 - **懒加载**: 按需生成预览图片
 - **缓存优化**: 智能缓存处理结果
+
+### 简历导出
+- **求职简历**: 快速编写简历并导出专业 PDF
+- **模板切换**: 多种风格适配不同行业
+- **实时编辑**: Markdown 编写，所见即所得
 
 ## 🎯 使用场景
 
@@ -128,15 +159,16 @@ npx serve .  # 或使用 Python, PHP, Live Server 等
 ### 项目结构
 ```
 splitpic/
-├── index.html              # 主页面（包含切割和裁剪功能）
+├── index.html              # 主页面（包含切割、裁剪和简历功能）
 ├── css/
-│   └── style.css          # 样式文件（包含标签页和裁剪工具样式）
+│   └── style.css          # 样式文件（包含标签页、裁剪和简历工具样式）
 ├── js/
 │   ├── app.js            # 统一应用控制器
 │   ├── main.js           # 切割应用逻辑
 │   ├── imageProcessor.js # 图片切割核心
 │   ├── cropper.js        # 图片裁剪核心
 │   ├── cropApp.js        # 裁剪应用逻辑
+│   ├── resumeApp.js      # 简历导出应用逻辑
 │   ├── utils.js          # 工具函数库
 │   └── zip-loader.js     # ZIP库加载器
 ├── assets/
@@ -149,10 +181,10 @@ splitpic/
 #### `UnifiedApp` (js/app.js)
 统一应用控制器，负责：
 - 标签页切换管理
-- 切割和裁剪应用的协调
+- 切割、裁剪和简历应用的协调
 - 懒加载优化
 
-#### `SplitPicApp` (js/main.js)
+#### `SplitPicApp` (js/main.js) - *注：历史命名，项目已更名为 ToolBox*
 切割应用类，负责：
 - UI交互和事件处理
 - 文件上传和预览
@@ -181,6 +213,13 @@ splitpic/
 - 按需加载JSZip库
 - 优化初始加载性能
 
+#### `ResumeApp` (js/resumeApp.js)
+简历导出应用类，负责：
+- Markdown 编辑和实时预览
+- 三套简历模板切换（经典/现代/创意）
+- PDF 导出（A4 尺寸）
+- marked.js 和 html2pdf.js 按需加载
+
 ## 🤝 贡献指南
 
 欢迎提交 Issue 和 Pull Request！
@@ -200,11 +239,13 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 - [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) - 强大的图片处理能力
 - [JSZip](https://stuk.github.io/jszip/) - ZIP文件创建库
+- [marked.js](https://marked.js.org/) - Markdown 解析库
+- [html2pdf.js](https://github.com/eKoopmans/html2pdf.js) - 浏览器端 PDF 生成
 - [CSS Grid](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout) - 现代化布局
 
 ---
 
-**SplitPic** - 让图片处理变得简单高效！ 🚀
+**ToolBox** - 让图片处理和简历导出变得简单高效！ 🚀
 
 ## 📞 联系方式
 
@@ -214,4 +255,4 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 ---
 
-**SplitPic** - 让图片切割变得简单高效！ 🚀
+**ToolBox** - 让图片处理和简历导出变得简单高效！ 🚀
