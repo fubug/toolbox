@@ -14,7 +14,7 @@
                 <span class="icon">✂️</span>
                 SplitPic
             </h1>
-            <p class="subtitle">智能图片工具 - 切割与裁剪，保持原图质量</p>
+            <p class="subtitle">智能图片工具 - 切割、裁剪与简历导出</p>
         </header>
 
         <!-- 标签页导航 -->
@@ -27,6 +27,10 @@
                 <button class="tab-btn" data-tab="crop">
                     <span class="tab-icon">✂️</span>
                     <span>裁剪</span>
+                </button>
+                <button class="tab-btn" data-tab="resume">
+                    <span class="tab-icon">📄</span>
+                    <span>简历</span>
                 </button>
             </div>
         </div>
@@ -172,6 +176,42 @@
                 </section>
             </div>
 
+            <!-- 简历导出标签页 -->
+            <div class="tab-content" id="resume-tab">
+                <!-- 编辑区 -->
+                <section class="resume-editor-section" id="resume-editorSection">
+                    <div class="resume-editor-wrapper">
+                        <h3>Markdown 简历编辑器</h3>
+                        <textarea id="resume-markdownInput" placeholder="在此输入 Markdown 格式的简历内容..." spellcheck="false"></textarea>
+                        <div class="resume-controls" id="resume-controls">
+                            <div class="resume-control-group">
+                                <label for="resume-templateSelect">选择模板：</label>
+                                <select id="resume-templateSelect">
+                                    <option value="classic">经典简约</option>
+                                    <option value="modern">现代双栏</option>
+                                    <option value="creative">创意卡片</option>
+                                </select>
+                            </div>
+                            <button class="resume-btn resume-btn-primary" id="resume-previewBtn">预览简历</button>
+                            <button class="resume-btn resume-btn-success" id="resume-exportBtn" disabled>导出 PDF</button>
+                        </div>
+                    </div>
+                </section>
+                <!-- 预览区 -->
+                <section class="resume-preview-section" id="resume-previewSection" style="display: none;">
+                    <div class="resume-preview-header">
+                        <h3>简历预览</h3>
+                        <div class="resume-preview-actions" id="resume-previewActions">
+                            <button class="resume-btn resume-btn-secondary" id="resume-editBtn">返回编辑</button>
+                            <button class="resume-btn resume-btn-success" id="resume-confirmExportBtn">确认导出 PDF</button>
+                        </div>
+                    </div>
+                    <div class="resume-preview-wrapper">
+                        <div class="resume-preview-container" id="resume-previewContainer"></div>
+                    </div>
+                </section>
+            </div>
+
             <!-- 加载状态 -->
             <div class="loading-overlay" id="loadingOverlay" style="display: none;">
                 <div class="loading-spinner"></div>
@@ -191,6 +231,7 @@
     <script src="js/cropper.js"></script>
     <script src="js/main.js"></script>
     <script src="js/cropApp.js"></script>
+    <script src="js/resumeApp.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

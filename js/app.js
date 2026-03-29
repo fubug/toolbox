@@ -7,6 +7,7 @@ class UnifiedApp {
         this.currentTab = 'split';
         this.splitApp = null;
         this.cropApp = null;
+        this.resumeApp = null;
         this.tabElements = {};
 
         this.init();
@@ -34,7 +35,8 @@ class UnifiedApp {
             buttons: document.querySelectorAll('.tab-btn'),
             contents: document.querySelectorAll('.tab-content'),
             splitTab: document.getElementById('split-tab'),
-            cropTab: document.getElementById('crop-tab')
+            cropTab: document.getElementById('crop-tab'),
+            resumeTab: document.getElementById('resume-tab')
         };
     }
 
@@ -91,6 +93,8 @@ class UnifiedApp {
             this.splitApp.deactivate();
         } else if (this.currentTab === 'crop' && this.cropApp) {
             this.cropApp.deactivate();
+        } else if (this.currentTab === 'resume' && this.resumeApp) {
+            this.resumeApp.deactivate();
         }
     }
 
@@ -131,6 +135,12 @@ class UnifiedApp {
                 this.cropApp = new CropApp();
             }
             this.cropApp.activate();
+        } else if (tabName === 'resume') {
+            if (!this.resumeApp) {
+                console.log('初始化简历应用');
+                this.resumeApp = new ResumeApp();
+            }
+            this.resumeApp.activate();
         }
     }
 
@@ -141,7 +151,8 @@ class UnifiedApp {
     updatePageTitle(tabName) {
         const titles = {
             split: 'SplitPic - 智能图片切割工具',
-            crop: 'SplitPic - 智能图片裁剪工具'
+            crop: 'SplitPic - 智能图片裁剪工具',
+            resume: 'SplitPic - 简历导出工具'
         };
         document.title = titles[tabName] || 'SplitPic - 智能图片工具';
     }
@@ -155,6 +166,8 @@ class UnifiedApp {
             return this.splitApp;
         } else if (this.currentTab === 'crop') {
             return this.cropApp;
+        } else if (this.currentTab === 'resume') {
+            return this.resumeApp;
         }
         return null;
     }

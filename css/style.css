@@ -777,3 +777,315 @@ body {
         padding: 1rem;
     }
 }
+
+/* ===== 简历导出工具样式（限定在 #resume-tab 作用域） ===== */
+
+#resume-tab .resume-editor-section,
+#resume-tab .resume-preview-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+#resume-tab .resume-editor-wrapper h3,
+#resume-tab .resume-preview-header h3 {
+    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+}
+
+#resume-tab #resume-markdownInput {
+    width: 100%;
+    min-height: 450px;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #333;
+    background: #fafafa;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+#resume-tab #resume-markdownInput:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #fff;
+}
+
+#resume-tab .resume-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+#resume-tab .resume-control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#resume-tab .resume-control-group label {
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+#resume-tab .resume-control-group select {
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    min-width: 140px;
+}
+
+#resume-tab .resume-control-group select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Resume buttons */
+#resume-tab .resume-btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    font-weight: 500;
+}
+
+#resume-tab .resume-btn:hover {
+    transform: translateY(-2px);
+}
+
+#resume-tab .resume-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#resume-tab .resume-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+#resume-tab .resume-btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+#resume-tab .resume-btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+#resume-tab .resume-btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Resume preview layout */
+#resume-tab .resume-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+#resume-tab .resume-preview-header h3 {
+    margin-bottom: 0;
+}
+
+#resume-tab .resume-preview-actions {
+    display: flex;
+    gap: 12px;
+}
+
+#resume-tab .resume-preview-wrapper {
+    display: flex;
+    justify-content: center;
+    background: #f0f0f0;
+    border-radius: 10px;
+    padding: 30px;
+}
+
+/* Resume preview container - A4 style */
+#resume-tab .resume-preview-container {
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
+    background: white;
+    padding: 20mm 25mm;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #333;
+}
+
+#resume-tab .resume-preview-container h1 {
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+
+#resume-tab .resume-preview-container h2 {
+    font-size: 20px;
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+}
+
+#resume-tab .resume-preview-container h3 {
+    font-size: 16px;
+    margin: 16px 0 8px;
+}
+
+#resume-tab .resume-preview-container p {
+    margin: 6px 0;
+}
+
+#resume-tab .resume-preview-container ul {
+    margin: 6px 0 6px 24px;
+}
+
+#resume-tab .resume-preview-container li {
+    margin: 4px 0;
+    line-height: 1.6;
+}
+
+#resume-tab .resume-preview-container strong {
+    font-weight: 600;
+}
+
+#resume-tab .resume-preview-container hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 16px 0;
+}
+
+#resume-tab .resume-preview-container a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* 模板1: 经典简约 */
+#resume-tab .resume-classic h1 {
+    color: #1a1a1a;
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+}
+
+#resume-tab .resume-classic h2 {
+    color: #1a1a1a;
+    border-bottom: 2px solid #333;
+}
+
+#resume-tab .resume-classic h3 {
+    color: #333;
+}
+
+/* 模板2: 现代双栏 */
+#resume-tab .resume-modern h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #2980b9;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+}
+
+#resume-tab .resume-modern h2 {
+    color: #2980b9;
+    border-bottom: 2px solid #2980b9;
+}
+
+#resume-tab .resume-modern h3 {
+    color: #34495e;
+}
+
+#resume-tab .resume-modern strong {
+    color: #2c3e50;
+}
+
+#resume-tab .resume-modern li::marker {
+    color: #2980b9;
+}
+
+/* 模板3: 创意卡片 */
+#resume-tab .resume-creative h1 {
+    color: #6c5ce7;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+#resume-tab .resume-creative h2 {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border-bottom: none;
+    display: inline-block;
+    margin-top: 24px;
+}
+
+#resume-tab .resume-creative h3 {
+    color: #6c5ce7;
+}
+
+#resume-tab .resume-creative strong {
+    color: #6c5ce7;
+}
+
+#resume-tab .resume-creative hr {
+    border-top: 2px dashed #a29bfe;
+}
+
+#resume-tab .resume-creative li::marker {
+    color: #a29bfe;
+}
+
+/* 简历工具响应式设计 */
+@media (max-width: 768px) {
+    #resume-tab #resume-markdownInput {
+        min-height: 300px;
+        font-size: 13px;
+    }
+
+    #resume-tab .resume-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #resume-tab .resume-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    #resume-tab .resume-preview-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #resume-tab .resume-preview-actions {
+        width: 100%;
+    }
+
+    #resume-tab .resume-preview-actions .resume-btn {
+        flex: 1;
+    }
+
+    #resume-tab .resume-preview-wrapper {
+        padding: 10px;
+    }
+
+    #resume-tab .resume-preview-container {
+        padding: 10mm 12mm;
+    }
+}
