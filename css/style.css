@@ -818,36 +818,406 @@ body {
 
 #resume-tab .resume-controls {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 16px;
     margin-top: 20px;
-    flex-wrap: wrap;
 }
 
-#resume-tab .resume-control-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+/* Template picker grid */
+#resume-tab .resume-template-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
 }
 
-#resume-tab .resume-control-group label {
+#resume-tab .template-card {
+    cursor: pointer;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px;
+    transition: all 0.25s ease;
+    background: #fafafa;
+}
+
+#resume-tab .template-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+#resume-tab .template-card.active {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+    background: #f0f3ff;
+}
+
+#resume-tab .template-name {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
     font-weight: 600;
+    color: #555;
+}
+
+#resume-tab .template-card.active .template-name {
+    color: #667eea;
+}
+
+/* Mini template preview (inside each card) */
+#resume-tab .template-preview {
+    width: 100%;
+    aspect-ratio: 210 / 297;
+    border-radius: 4px;
+    padding: 12% 10% 8%;
+    display: flex;
+    flex-direction: column;
+    gap: 5%;
+    font-size: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+#resume-tab .tp-title {
+    height: 9%;
+    border-radius: 2px;
+    width: 55%;
+}
+
+#resume-tab .tp-title.tp-center {
+    margin: 0 auto;
+}
+
+#resume-tab .tp-title.tp-serif {
+    font-family: Georgia, serif;
+    letter-spacing: 2px;
+}
+
+#resume-tab .tp-title.tp-mono {
+    font-family: 'Courier New', monospace;
+    width: 65%;
+}
+
+#resume-tab .tp-line {
+    height: 2px;
+    width: 100%;
+    margin: 1% 0 3%;
+}
+
+#resume-tab .tp-line.dashed {
+    border-top: 2px dashed;
+    height: 0;
+    background: none !important;
+}
+
+#resume-tab .tp-heading {
+    height: 6%;
+    border-radius: 2px;
+    width: 35%;
+}
+
+#resume-tab .tp-heading.tp-serif {
+    font-family: Georgia, serif;
+}
+
+#resume-tab .tp-heading.tp-uppercase {
+    width: 50%;
+    letter-spacing: 1px;
+}
+
+#resume-tab .tp-heading.tp-sidebar {
+    border-left-width: 3px;
+    border-left-style: solid;
+    padding-left: 6px;
+    border-radius: 0;
+}
+
+#resume-tab .tp-heading.tp-mono {
+    font-family: 'Courier New', monospace;
+}
+
+#resume-tab .tp-text {
+    height: 3.5%;
+    border-radius: 2px;
+    width: 85%;
+    opacity: 0.45;
+}
+
+#resume-tab .tp-text.short {
+    width: 60%;
+}
+
+#resume-tab .tp-text.tp-mono {
+    font-family: 'Courier New', monospace;
+}
+
+#resume-tab .tp-badge {
+    height: 7%;
+    border-radius: 3px;
+    width: 38%;
+}
+
+#resume-tab .tp-bullet {
+    height: 3.5%;
+    border-radius: 2px;
+    width: 80%;
+    opacity: 0.4;
+    position: relative;
+    padding-left: 8px;
+}
+
+#resume-tab .tp-bullet.short {
+    width: 55%;
+}
+
+#resume-tab .tp-deco {
+    height: 3px;
+    width: 25%;
+    margin: 0 auto 2%;
+    border-radius: 2px;
+}
+
+/* --- Classic: centered, black/white, traditional --- */
+#resume-tab .template-preview-classic {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+}
+#resume-tab .template-preview-classic .tp-title { background: #1a1a1a; }
+#resume-tab .template-preview-classic .tp-line { background: #333; }
+#resume-tab .template-preview-classic .tp-heading { background: #333; }
+#resume-tab .template-preview-classic .tp-text { background: #666; }
+
+/* --- Modern: left-aligned, blue accents, bullet items --- */
+#resume-tab .template-preview-modern {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+}
+#resume-tab .template-preview-modern .tp-title { background: #2c3e50; width: 50%; }
+#resume-tab .template-preview-modern .tp-line { background: #2980b9; }
+#resume-tab .template-preview-modern .tp-heading { background: #2980b9; }
+#resume-tab .template-preview-modern .tp-bullet { background: #95a5a6; }
+#resume-tab .template-preview-modern .tp-bullet::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #2980b9;
+}
+
+/* --- Creative: centered, gradient badges, dashed lines --- */
+#resume-tab .template-preview-creative {
+    background: #faf5ff;
+    border: 1px solid #e8e0f0;
+}
+#resume-tab .template-preview-creative .tp-title { background: #6c5ce7; }
+#resume-tab .template-preview-creative .tp-line { border-color: #a29bfe; }
+#resume-tab .template-preview-creative .tp-badge { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+#resume-tab .template-preview-creative .tp-text { background: #a29bfe; }
+
+/* --- Academic: serif, uppercase headings, minimalist --- */
+#resume-tab .template-preview-academic {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+}
+#resume-tab .template-preview-academic .tp-title { background: #000; }
+#resume-tab .template-preview-academic .tp-line { background: #000; }
+#resume-tab .template-preview-academic .tp-heading { background: #333; }
+#resume-tab .template-preview-academic .tp-text { background: #888; }
+
+/* --- Business: gold sidebar borders, dark navy --- */
+#resume-tab .template-preview-business {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+}
+#resume-tab .template-preview-business .tp-title { background: #1b2a4a; width: 50%; }
+#resume-tab .template-preview-business .tp-line { background: #c9a961; }
+#resume-tab .template-preview-business .tp-heading {
+    background: #1b2a4a;
+    border-left-color: #c9a961;
+}
+#resume-tab .template-preview-business .tp-text { background: #8a8a8a; }
+
+/* --- Fresh: green, light bg, centered with dot deco --- */
+#resume-tab .template-preview-fresh {
+    background: #f0fff4;
+    border: 1px solid #c8f7d8;
+}
+#resume-tab .template-preview-fresh .tp-title { background: #2d8f5e; }
+#resume-tab .template-preview-fresh .tp-deco { background: #a8e6cf; }
+#resume-tab .template-preview-fresh .tp-heading { background: #27ae60; }
+#resume-tab .template-preview-fresh .tp-text { background: #6dd5a0; }
+
+/* --- Tech: dark bg, cyan monospace, terminal feel --- */
+#resume-tab .template-preview-tech {
+    background: #1a1a2e;
+    border: 1px solid #16213e;
+}
+#resume-tab .template-preview-tech .tp-title { background: #00d4ff; }
+#resume-tab .template-preview-tech .tp-line { background: #16213e; height: 1px; }
+#resume-tab .template-preview-tech .tp-heading { background: #00d4ff; width: 45%; }
+#resume-tab .template-preview-tech .tp-text { background: #3a3a5a; opacity: 0.7; }
+
+/* Resume action buttons row */
+#resume-tab .resume-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Editor header */
+#resume-tab .resume-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+#resume-tab .resume-editor-header h3 {
+    margin-bottom: 0;
+}
+
+/* Draft toggle button */
+#resume-tab .draft-toggle-btn {
+    padding: 6px 16px;
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    color: #666;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#resume-tab .draft-toggle-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+/* Draft panel */
+#resume-tab .draft-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, margin 0.3s ease;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0;
+}
+
+#resume-tab .draft-panel.open {
+    max-height: 400px;
+    margin-bottom: 12px;
+    overflow-y: auto;
+}
+
+#resume-tab .draft-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8e8e8;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+}
+
+#resume-tab .draft-save-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+}
+
+/* Draft list */
+#resume-tab .draft-list {
+    padding: 8px;
+}
+
+#resume-tab .draft-empty {
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    padding: 16px 0;
+    margin: 0;
+}
+
+#resume-tab .draft-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+}
+
+#resume-tab .draft-item:hover {
+    background: #eef0f5;
+}
+
+#resume-tab .draft-item.active {
+    background: #eef1ff;
+    border-left: 3px solid #667eea;
+}
+
+#resume-tab .draft-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+#resume-tab .draft-name {
+    font-size: 14px;
+    font-weight: 500;
     color: #333;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-#resume-tab .resume-control-group select {
-    padding: 10px 15px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-    min-width: 140px;
+#resume-tab .draft-time {
+    font-size: 12px;
+    color: #999;
 }
 
-#resume-tab .resume-control-group select:focus {
-    outline: none;
+#resume-tab .draft-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+#resume-tab .draft-load,
+#resume-tab .draft-delete {
+    padding: 4px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+#resume-tab .draft-load:hover {
     border-color: #667eea;
+    color: #667eea;
+}
+
+#resume-tab .draft-item.active .draft-load {
+    background: #667eea;
+    color: #fff;
+    border-color: #667eea;
+    cursor: default;
+}
+
+#resume-tab .draft-delete {
+    color: #999;
+}
+
+#resume-tab .draft-delete:hover {
+    border-color: #e74c3c;
+    color: #e74c3c;
 }
 
 /* Resume buttons */
@@ -1051,6 +1421,173 @@ body {
     color: #a29bfe;
 }
 
+/* 模板4: 学术科研 */
+#resume-tab .resume-academic {
+    font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+#resume-tab .resume-academic h1 {
+    color: #000;
+    text-align: center;
+    letter-spacing: 4px;
+    border-bottom: none;
+    margin-bottom: 2px;
+    font-size: 26px;
+}
+
+#resume-tab .resume-academic h2 {
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 4px;
+    margin-top: 22px;
+    font-size: 17px;
+}
+
+#resume-tab .resume-academic h3 {
+    color: #222;
+    font-style: italic;
+    font-size: 15px;
+}
+
+#resume-tab .resume-academic p,
+#resume-tab .resume-academic li {
+    color: #222;
+    line-height: 1.75;
+    font-size: 13.5px;
+}
+
+#resume-tab .resume-academic strong {
+    color: #000;
+}
+
+#resume-tab .resume-academic hr {
+    border-top: 1px solid #999;
+}
+
+/* 模板5: 商务精英 */
+#resume-tab .resume-business h1 {
+    color: #1b2a4a;
+    letter-spacing: 2px;
+    border-bottom: 3px solid #c9a961;
+    padding-bottom: 10px;
+}
+
+#resume-tab .resume-business h2 {
+    color: #1b2a4a;
+    border-left: 4px solid #c9a961;
+    padding-left: 12px;
+    border-bottom: none;
+    margin-top: 24px;
+    font-size: 18px;
+}
+
+#resume-tab .resume-business h3 {
+    color: #2c3e50;
+    font-size: 15px;
+}
+
+#resume-tab .resume-business strong {
+    color: #1b2a4a;
+}
+
+#resume-tab .resume-business hr {
+    border-top: 1px solid #c9a961;
+}
+
+#resume-tab .resume-business li {
+    list-style-type: square;
+}
+
+#resume-tab .resume-business li::marker {
+    color: #c9a961;
+}
+
+/* 模板6: 清新文艺 */
+#resume-tab .resume-fresh h1 {
+    color: #2d8f5e;
+    text-align: center;
+}
+
+#resume-tab .resume-fresh h2 {
+    color: #27ae60;
+    border-bottom: 2px solid #a8e6cf;
+    padding-bottom: 6px;
+    margin-top: 22px;
+}
+
+#resume-tab .resume-fresh h3 {
+    color: #2d8f5e;
+}
+
+#resume-tab .resume-fresh strong {
+    color: #27ae60;
+}
+
+#resume-tab .resume-fresh hr {
+    border-top: 2px dotted #a8e6cf;
+}
+
+#resume-tab .resume-fresh li::marker {
+    color: #6dd5a0;
+}
+
+/* 模板7: 科技极客 */
+#resume-tab .resume-tech {
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 8px;
+    padding: 20mm;
+}
+
+#resume-tab .resume-tech h1 {
+    color: #00d4ff;
+    font-family: 'Courier New', monospace;
+    text-align: left;
+    border-bottom: 2px solid #00d4ff;
+    padding-bottom: 8px;
+    font-size: 26px;
+}
+
+#resume-tab .resume-tech h2 {
+    color: #00d4ff;
+    font-family: 'Courier New', monospace;
+    border-bottom: 1px solid #16213e;
+    padding-bottom: 4px;
+    margin-top: 22px;
+    font-size: 18px;
+}
+
+#resume-tab .resume-tech h3 {
+    color: #7fdbca;
+    font-size: 15px;
+}
+
+#resume-tab .resume-tech p,
+#resume-tab .resume-tech li {
+    color: #c5c8c6;
+}
+
+#resume-tab .resume-tech strong {
+    color: #00d4ff;
+}
+
+#resume-tab .resume-tech hr {
+    border-top: 1px solid #16213e;
+}
+
+#resume-tab .resume-tech li::marker {
+    color: #00d4ff;
+}
+
+#resume-tab .resume-tech code {
+    background: #16213e;
+    color: #7fdbca;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
 /* 简历工具响应式设计 */
 @media (max-width: 768px) {
     #resume-tab #resume-markdownInput {
@@ -1058,13 +1595,40 @@ body {
         font-size: 13px;
     }
 
-    #resume-tab .resume-controls {
-        flex-direction: column;
-        align-items: stretch;
+    #resume-tab .resume-template-picker {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
     }
 
     #resume-tab .resume-btn {
         width: 100%;
+        text-align: center;
+    }
+
+    #resume-tab .resume-actions {
+        flex-direction: column;
+    }
+
+    #resume-tab .draft-panel-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    #resume-tab .draft-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    #resume-tab .draft-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    #resume-tab .draft-load,
+    #resume-tab .draft-delete {
+        flex: 1;
         text-align: center;
     }
 

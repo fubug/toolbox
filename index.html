@@ -181,19 +181,115 @@
                 <!-- 编辑区 -->
                 <section class="resume-editor-section" id="resume-editorSection">
                     <div class="resume-editor-wrapper">
-                        <h3>Markdown 简历编辑器</h3>
+                        <div class="resume-editor-header">
+                            <h3>Markdown 简历编辑器</h3>
+                            <button class="draft-toggle-btn" id="resume-draftToggle">草稿箱</button>
+                        </div>
+                        <!-- Draft panel -->
+                        <div class="draft-panel" id="resume-draftPanel">
+                            <div class="draft-panel-header">
+                                <span>已保存的草稿</span>
+                                <button class="resume-btn resume-btn-primary draft-save-btn" id="resume-saveDraftBtn">保存当前草稿</button>
+                            </div>
+                            <div class="draft-list" id="resume-draftList">
+                                <p class="draft-empty">暂无保存的草稿</p>
+                            </div>
+                        </div>
                         <textarea id="resume-markdownInput" placeholder="在此输入 Markdown 格式的简历内容..." spellcheck="false"></textarea>
                         <div class="resume-controls" id="resume-controls">
-                            <div class="resume-control-group">
-                                <label for="resume-templateSelect">选择模板：</label>
-                                <select id="resume-templateSelect">
-                                    <option value="classic">经典简约</option>
-                                    <option value="modern">现代双栏</option>
-                                    <option value="creative">创意卡片</option>
-                                </select>
+                            <div class="resume-template-picker" id="resume-templatePicker">
+                                <div class="template-card active" data-template="classic">
+                                    <div class="template-preview template-preview-classic">
+                                        <div class="tp-title tp-center"></div>
+                                        <div class="tp-line"></div>
+                                        <div class="tp-heading"></div>
+                                        <div class="tp-text"></div>
+                                        <div class="tp-text"></div>
+                                        <div class="tp-heading"></div>
+                                        <div class="tp-text short"></div>
+                                        <div class="tp-text short"></div>
+                                    </div>
+                                    <span class="template-name">经典简约</span>
+                                </div>
+                                <div class="template-card" data-template="modern">
+                                    <div class="template-preview template-preview-modern">
+                                        <div class="tp-title"></div>
+                                        <div class="tp-line"></div>
+                                        <div class="tp-heading"></div>
+                                        <div class="tp-bullet"></div>
+                                        <div class="tp-bullet short"></div>
+                                        <div class="tp-heading"></div>
+                                        <div class="tp-bullet"></div>
+                                        <div class="tp-bullet short"></div>
+                                    </div>
+                                    <span class="template-name">现代双栏</span>
+                                </div>
+                                <div class="template-card" data-template="creative">
+                                    <div class="template-preview template-preview-creative">
+                                        <div class="tp-title tp-center"></div>
+                                        <div class="tp-line dashed"></div>
+                                        <div class="tp-badge"></div>
+                                        <div class="tp-text"></div>
+                                        <div class="tp-text short"></div>
+                                        <div class="tp-badge"></div>
+                                        <div class="tp-text short"></div>
+                                    </div>
+                                    <span class="template-name">创意卡片</span>
+                                </div>
+                                <div class="template-card" data-template="academic">
+                                    <div class="template-preview template-preview-academic">
+                                        <div class="tp-title tp-center tp-serif"></div>
+                                        <div class="tp-line"></div>
+                                        <div class="tp-heading tp-serif tp-uppercase"></div>
+                                        <div class="tp-text"></div>
+                                        <div class="tp-text short"></div>
+                                        <div class="tp-heading tp-serif tp-uppercase"></div>
+                                        <div class="tp-text short"></div>
+                                    </div>
+                                    <span class="template-name">学术科研</span>
+                                </div>
+                                <div class="template-card" data-template="business">
+                                    <div class="template-preview template-preview-business">
+                                        <div class="tp-title"></div>
+                                        <div class="tp-line"></div>
+                                        <div class="tp-heading tp-sidebar"></div>
+                                        <div class="tp-text"></div>
+                                        <div class="tp-text short"></div>
+                                        <div class="tp-heading tp-sidebar"></div>
+                                        <div class="tp-text short"></div>
+                                    </div>
+                                    <span class="template-name">商务精英</span>
+                                </div>
+                                <div class="template-card" data-template="fresh">
+                                    <div class="template-preview template-preview-fresh">
+                                        <div class="tp-title tp-center"></div>
+                                        <div class="tp-deco"></div>
+                                        <div class="tp-heading"></div>
+                                        <div class="tp-text"></div>
+                                        <div class="tp-text short"></div>
+                                        <div class="tp-heading"></div>
+                                        <div class="tp-text short"></div>
+                                    </div>
+                                    <span class="template-name">清新文艺</span>
+                                </div>
+                                <div class="template-card" data-template="tech">
+                                    <div class="template-preview template-preview-tech">
+                                        <div class="tp-title tp-mono"></div>
+                                        <div class="tp-line"></div>
+                                        <div class="tp-heading tp-mono"></div>
+                                        <div class="tp-text tp-mono"></div>
+                                        <div class="tp-text tp-mono short"></div>
+                                        <div class="tp-heading tp-mono"></div>
+                                        <div class="tp-text tp-mono short"></div>
+                                    </div>
+                                    <span class="template-name">科技极客</span>
+                                </div>
                             </div>
-                            <button class="resume-btn resume-btn-primary" id="resume-previewBtn">预览简历</button>
-                            <button class="resume-btn resume-btn-success" id="resume-exportBtn" disabled>导出 PDF</button>
+                            <div class="resume-actions">
+                                <button class="resume-btn resume-btn-primary" id="resume-previewBtn">预览简历</button>
+                                <button class="resume-btn resume-btn-secondary" id="resume-exportMdBtn">导出 Markdown</button>
+                                <button class="resume-btn resume-btn-success" id="resume-exportBtn" disabled>导出 PDF</button>
+                            </div>
                         </div>
                     </div>
                 </section>

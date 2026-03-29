@@ -1,6 +1,55 @@
 // 工具函数库
 
 /**
+ * 显示自动消失的 toast 提示
+ * @param {string} message - 提示内容
+ * @param {'success'|'error'} type - 提示类型
+ */
+function showToast(message, type = 'success') {
+    const existing = document.getElementById('toast-container');
+    if (existing) existing.remove();
+
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s, transform 0.3s;
+    `;
+
+    if (type === 'error') {
+        container.style.background = '#e74c3c';
+        container.textContent = message;
+    } else {
+        container.style.background = '#27ae60';
+        container.textContent = message;
+    }
+
+    document.body.appendChild(container);
+    // Trigger animation
+    requestAnimationFrame(() => {
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(-10px)';
+        setTimeout(() => container.remove(), 300);
+    }, 2000);
+}
+
+/**
  * 格式化文件大小
  * @param {number} bytes - 字节数
  * @returns {string} 格式化后的文件大小
@@ -52,7 +101,7 @@ function downloadFile(url, filename) {
  * @param {string} message - 错误信息
  */
 function showError(message) {
-    alert('错误：' + message);
+    showToast(message, 'error');
     console.error(message);
 }
 
@@ -244,7 +293,7 @@ function downloadCanvas(canvas, filename, format = 'png') {
  * @param {string} message - 消息内容
  */
 function showSuccess(message) {
-    alert(message);
+    showToast(message, 'success');
 }
 
 /**

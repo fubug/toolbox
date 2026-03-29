@@ -1,5 +1,6 @@
 /**
  * 简历导出应用 - Markdown 输入 → 模板美化 → PDF 导出
+ * 支持本地草稿自动保存与管理
  */
 
 class ResumeApp {
@@ -8,24 +9,36 @@ class ResumeApp {
         this.editorSection = document.getElementById('resume-editorSection');
         this.previewSection = document.getElementById('resume-previewSection');
         this.markdownInput = document.getElementById('resume-markdownInput');
-        this.templateSelect = document.getElementById('resume-templateSelect');
+        this.templatePicker = document.getElementById('resume-templatePicker');
         this.previewBtn = document.getElementById('resume-previewBtn');
         this.exportBtn = document.getElementById('resume-exportBtn');
         this.previewContainer = document.getElementById('resume-previewContainer');
         this.editBtn = document.getElementById('resume-editBtn');
         this.confirmExportBtn = document.getElementById('resume-confirmExportBtn');
+        this.exportMdBtn = document.getElementById('resume-exportMdBtn');
+
+        // Draft DOM
+        this.draftList = document.getElementById('resume-draftList');
+        this.draftToggle = document.getElementById('resume-draftToggle');
+        this.draftPanel = document.getElementById('resume-draftPanel');
+        this.saveDraftBtn = document.getElementById('resume-saveDraftBtn');
 
         // State
         this.isActive = false;
         this.depsLoaded = false;
         this.currentTemplate = 'classic';
+        this.autoSaveTimer = null;
+        this.currentDraftId = null;
+        this.STORAGE_KEY = 'toolbox_resume_drafts';
+        this.AUTOSAVE_KEY = 'toolbox_resume_autosave';
 
         this.init();
     }
 
     init() {
         this.bindEvents();
-        this.loadSampleContent();
+        this.restoreAutoSave() || this.loadSampleContent();
+        this.renderDraftList();
         this.isActive = true;
     }
 
@@ -48,14 +61,218 @@ class ResumeApp {
         this.exportBtn.addEventListener('click', () => this.handleExport());
         this.editBtn.addEventListener('click', () => this.handleEdit());
         this.confirmExportBtn.addEventListener('click', () => this.handleExport());
-        this.templateSelect.addEventListener('change', () => {
-            this.currentTemplate = this.templateSelect.value;
-            // 如果已在预览模式，实时更新模板
+
+        // Template card clicks
+        this.templatePicker.addEventListener('click', (e) => {
+            const card = e.target.closest('.template-card');
+            if (!card) return;
+            this.currentTemplate = card.dataset.template;
+            this.templatePicker.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
             if (this.previewSection.style.display !== 'none') {
                 this.applyTemplate();
             }
         });
+
+        // Auto-save on input (debounced 2s)
+        this.markdownInput.addEventListener('input', () => {
+            clearTimeout(this.autoSaveTimer);
+            this.autoSaveTimer = setTimeout(() => this.autoSave(), 2000);
+        });
+
+        // Draft panel toggle
+        this.draftToggle.addEventListener('click', () => {
+            this.draftPanel.classList.toggle('open');
+        });
+
+        // Save draft button
+        this.saveDraftBtn.addEventListener('click', () => this.handleSaveDraft());
+
+        // Export markdown button
+        this.exportMdBtn.addEventListener('click', () => this.handleExportMd());
+
+        // Draft list delegation (load / delete)
+        this.draftList.addEventListener('click', (e) => {
+            const loadBtn = e.target.closest('.draft-load');
+            const deleteBtn = e.target.closest('.draft-delete');
+            if (loadBtn) {
+                this.loadDraft(loadBtn.closest('.draft-item').dataset.id);
+            } else if (deleteBtn) {
+                this.deleteDraft(deleteBtn.closest('.draft-item').dataset.id);
+            }
+        });
     }
+
+    // ===================== Draft Storage =====================
+
+    getDrafts() {
+        try {
+            return JSON.parse(localStorage.getItem(this.STORAGE_KEY)) || [];
+        } catch {
+            return [];
+        }
+    }
+
+    saveDrafts(drafts) {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+    }
+
+    /**
+     * Auto-save current content + template to a special key
+     */
+    autoSave() {
+        const content = this.markdownInput.value;
+        if (!content.trim()) return;
+        const data = { content, template: this.currentTemplate, draftId: this.currentDraftId, updatedAt: Date.now() };
+        localStorage.setItem(this.AUTOSAVE_KEY, JSON.stringify(data));
+    }
+
+    /**
+     * Restore from auto-save on startup. Returns true if restored.
+     */
+    restoreAutoSave() {
+        try {
+            const data = JSON.parse(localStorage.getItem(this.AUTOSAVE_KEY));
+            if (data && data.content) {
+                this.markdownInput.value = data.content;
+                if (data.template) {
+                    this.currentTemplate = data.template;
+                    this.templatePicker.querySelectorAll('.template-card').forEach(c => {
+                        c.classList.toggle('active', c.dataset.template === this.currentTemplate);
+                    });
+                }
+                if (data.draftId) {
+                    this.currentDraftId = data.draftId;
+                }
+                return true;
+            }
+        } catch { /* ignore */ }
+        return false;
+    }
+
+    /**
+     * Save as a named draft
+     */
+    handleSaveDraft() {
+        const content = this.markdownInput.value.trim();
+        if (!content) {
+            showError('没有可保存的内容');
+            return;
+        }
+
+        // If editing an existing draft, update it
+        if (this.currentDraftId) {
+            const drafts = this.getDrafts();
+            const draft = drafts.find(d => d.id === this.currentDraftId);
+            if (draft) {
+                draft.content = content;
+                draft.template = this.currentTemplate;
+                draft.updatedAt = Date.now();
+                this.saveDrafts(drafts);
+                this.renderDraftList();
+                showSuccess('草稿已更新');
+                return;
+            }
+        }
+
+        // New draft — use first heading line as name
+        const name = this.extractDraftName(content);
+        const drafts = this.getDrafts();
+        drafts.unshift({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            name,
+            content,
+            template: this.currentTemplate,
+            updatedAt: Date.now()
+        });
+        this.saveDrafts(drafts);
+        this.currentDraftId = drafts[0].id;
+        this.renderDraftList();
+        showSuccess('草稿已保存');
+    }
+
+    extractDraftName(content) {
+        const firstLine = content.split('\n')[0].trim();
+        // Remove markdown heading markers
+        const name = firstLine.replace(/^#+\s*/, '').trim();
+        return name || '未命名草稿';
+    }
+
+    loadDraft(id) {
+        const drafts = this.getDrafts();
+        const draft = drafts.find(d => d.id === id);
+        if (!draft) return;
+
+        this.markdownInput.value = draft.content;
+        this.currentDraftId = draft.id;
+        this.currentTemplate = draft.template || 'classic';
+        this.templatePicker.querySelectorAll('.template-card').forEach(c => {
+            c.classList.toggle('active', c.dataset.template === this.currentTemplate);
+        });
+        this.autoSave();
+        this.renderDraftList();
+
+        // Close panel on mobile
+        if (window.innerWidth < 768) {
+            this.draftPanel.classList.remove('open');
+        }
+    }
+
+    deleteDraft(id) {
+        let drafts = this.getDrafts();
+        drafts = drafts.filter(d => d.id !== id);
+        this.saveDrafts(drafts);
+        if (this.currentDraftId === id) {
+            this.currentDraftId = null;
+        }
+        this.renderDraftList();
+    }
+
+    renderDraftList() {
+        const drafts = this.getDrafts();
+        if (drafts.length === 0) {
+            this.draftList.innerHTML = '<p class="draft-empty">暂无保存的草稿</p>';
+            return;
+        }
+        this.draftList.innerHTML = drafts.map(d => {
+            const time = this.formatTime(d.updatedAt);
+            const isActive = d.id === this.currentDraftId;
+            return `
+                <div class="draft-item${isActive ? ' active' : ''}" data-id="${d.id}">
+                    <div class="draft-info">
+                        <span class="draft-name">${this.escapeHtml(d.name)}</span>
+                        <span class="draft-time">${time}</span>
+                    </div>
+                    <div class="draft-actions">
+                        <button class="draft-load" title="加载此草稿">${isActive ? '编辑中' : '加载'}</button>
+                        <button class="draft-delete" title="删除此草稿">删除</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    formatTime(ts) {
+        const d = new Date(ts);
+        const now = new Date();
+        const diff = now - d;
+        if (diff < 60000) return '刚刚';
+        if (diff < 3600000) return Math.floor(diff / 60000) + ' 分钟前';
+        if (diff < 86400000) return Math.floor(diff / 3600000) + ' 小时前';
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${mm}-${dd} ${hh}:${mi}`;
+    }
+
+    escapeHtml(str) {
+        const el = document.createElement('span');
+        el.textContent = str;
+        return el.innerHTML;
+    }
+
+    // ===================== Original Features =====================
 
     /**
      * 加载示例简历内容
@@ -192,7 +409,7 @@ class ResumeApp {
      * 应用模板样式
      */
     applyTemplate() {
-        const templates = ['resume-classic', 'resume-modern', 'resume-creative'];
+        const templates = ['resume-classic', 'resume-modern', 'resume-creative', 'resume-academic', 'resume-business', 'resume-fresh', 'resume-tech'];
         templates.forEach(t => this.previewContainer.classList.remove(t));
         this.previewContainer.classList.add(`resume-${this.currentTemplate}`);
     }
@@ -216,13 +433,14 @@ class ResumeApp {
             const tempContainer = document.createElement('div');
             tempContainer.innerHTML = this.previewContainer.innerHTML;
             tempContainer.className = this.previewContainer.className;
+            const isDarkTemplate = this.currentTemplate === 'tech';
             tempContainer.style.cssText = `
                 width: 210mm;
                 padding: 15mm 20mm;
-                background: white;
+                background: ${isDarkTemplate ? '#1a1a2e' : 'white'};
                 font-size: 14px;
                 line-height: 1.6;
-                color: #333;
+                color: ${isDarkTemplate ? '#e0e0e0' : '#333'};
             `;
 
             // 注入模板内联样式到临时容器
@@ -272,6 +490,29 @@ class ResumeApp {
     }
 
     /**
+     * 导出当前编辑内容为 Markdown 文件
+     */
+    handleExportMd() {
+        const content = this.markdownInput.value.trim();
+        if (!content) {
+            showError('没有可导出的内容');
+            return;
+        }
+        // Use first heading as filename
+        const name = this.extractDraftName(content).replace(/[/\\?%*:|"<>]/g, '_');
+        const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${name}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showSuccess('Markdown 文件已导出');
+    }
+
+    /**
      * 获取模板内联样式（用于 PDF 生成时的临时容器）
      */
     getInlineTemplateStyles() {
@@ -309,10 +550,62 @@ class ResumeApp {
             hr { border-top: 2px dashed #a29bfe; }
         `;
 
+        const academicStyles = `
+            body { font-family: 'Georgia', 'Times New Roman', serif; }
+            h1 { color: #000; font-size: 26px; text-align: center; letter-spacing: 4px; border-bottom: none; margin-bottom: 2px; }
+            h2 { color: #000; font-size: 17px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #000; padding-bottom: 4px; margin-top: 22px; }
+            h3 { color: #222; font-size: 15px; font-style: italic; }
+            p, li { font-size: 13.5px; line-height: 1.75; color: #222; }
+            strong { color: #000; font-weight: 700; }
+            hr { border-top: 1px solid #999; }
+            ul { list-style-type: disc; }
+        `;
+
+        const businessStyles = `
+            h1 { color: #1b2a4a; font-size: 28px; letter-spacing: 2px; border-bottom: 3px solid #c9a961; padding-bottom: 10px; }
+            h2 { color: #1b2a4a; border-left: 4px solid #c9a961; padding-left: 12px; border-bottom: none; margin-top: 24px; font-size: 18px; }
+            h3 { color: #2c3e50; font-size: 15px; }
+            p, li { color: #3d3d3d; }
+            strong { color: #1b2a4a; }
+            hr { border-top: 1px solid #c9a961; }
+            ul { list-style-type: square; }
+            li::marker { color: #c9a961; }
+        `;
+
+        const freshStyles = `
+            h1 { color: #2d8f5e; text-align: center; font-size: 28px; }
+            h2 { color: #27ae60; border-bottom: 2px solid #a8e6cf; padding-bottom: 6px; margin-top: 22px; }
+            h3 { color: #2d8f5e; }
+            p, li { color: #444; }
+            strong { color: #27ae60; }
+            hr { border-top: 2px dotted #a8e6cf; }
+            li::marker { color: #6dd5a0; }
+            h1::after { content: ''; display: block; width: 60px; height: 3px; background: #a8e6cf; margin: 8px auto 0; border-radius: 2px; }
+        `;
+
+        const techStyles = `
+            body { background: #1a1a2e; color: #e0e0e0; }
+            h1 { color: #00d4ff; font-family: 'Courier New', monospace; text-align: left; font-size: 26px; border-bottom: 2px solid #00d4ff; padding-bottom: 8px; }
+            h1::before { content: '> '; color: #6c7a89; }
+            h2 { color: #00d4ff; border-bottom: 1px solid #16213e; padding-bottom: 4px; margin-top: 22px; font-size: 18px; font-family: 'Courier New', monospace; }
+            h2::before { content: '// '; color: #6c7a89; }
+            h3 { color: #7fdbca; font-size: 15px; }
+            p, li { color: #c5c8c6; }
+            strong { color: #00d4ff; }
+            a { color: #7fdbca; }
+            hr { border-top: 1px solid #16213e; }
+            li::marker { color: #00d4ff; }
+            code { background: #16213e; color: #7fdbca; padding: 1px 4px; border-radius: 3px; }
+        `;
+
         const templateMap = {
             classic: classicStyles,
             modern: modernStyles,
-            creative: creativeStyles
+            creative: creativeStyles,
+            academic: academicStyles,
+            business: businessStyles,
+            fresh: freshStyles,
+            tech: techStyles
         };
 
         return baseStyles + (templateMap[this.currentTemplate] || '');
