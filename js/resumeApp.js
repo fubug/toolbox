@@ -391,6 +391,9 @@ class ResumeApp {
             const htmlContent = marked.parse(markdown);
             this.previewContainer.innerHTML = htmlContent;
 
+            // 将第一个 hr 之前的内容包裹为 header 区域
+            this.wrapHeaderSection();
+
             // 应用模板样式
             this.applyTemplate();
 
@@ -403,6 +406,26 @@ class ResumeApp {
             console.error('预览失败:', error);
             showError('预览失败：' + error.message);
         }
+    }
+
+    /**
+     * 将第一个 <hr> 之前的元素包裹到 <div class="resume-header"> 中
+     */
+    wrapHeaderSection() {
+        const container = this.previewContainer;
+        const firstHr = container.querySelector('hr');
+        if (!firstHr) return;
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'resume-header';
+
+        // 把 firstHr 之前的所有兄弟节点移入 headerDiv
+        while (container.firstChild && container.firstChild !== firstHr) {
+            headerDiv.appendChild(container.firstChild);
+        }
+
+        // 在 firstHr 前插入 headerDiv
+        container.insertBefore(headerDiv, firstHr);
     }
 
     /**
@@ -522,6 +545,7 @@ class ResumeApp {
             h2 { font-size: 20px; margin: 20px 0 12px; padding-bottom: 6px; }
             h3 { font-size: 16px; margin: 14px 0 8px; }
             p { margin: 6px 0; line-height: 1.7; }
+            .resume-header { text-align: center; }
             ul { margin: 6px 0 6px 24px; }
             li { margin: 4px 0; line-height: 1.6; }
             strong { font-weight: 600; }
@@ -585,6 +609,7 @@ class ResumeApp {
 
         const techStyles = `
             body { background: #1a1a2e; color: #e0e0e0; }
+            .resume-header { text-align: left; }
             h1 { color: #00d4ff; font-family: 'Courier New', monospace; text-align: left; font-size: 26px; border-bottom: 2px solid #00d4ff; padding-bottom: 8px; }
             h1::before { content: '> '; color: #6c7a89; }
             h2 { color: #00d4ff; border-bottom: 1px solid #16213e; padding-bottom: 4px; margin-top: 22px; font-size: 18px; font-family: 'Courier New', monospace; }
