@@ -536,7 +536,7 @@ class ResumeApp {
         `;
 
         const modernStyles = `
-            h1 { color: #2c3e50; }
+            h1 { color: #2c3e50; text-align: center; }
             h2 { color: #2980b9; border-bottom: 2px solid #2980b9; }
             h3 { color: #34495e; }
             strong { color: #2c3e50; }
@@ -562,7 +562,7 @@ class ResumeApp {
         `;
 
         const businessStyles = `
-            h1 { color: #1b2a4a; font-size: 28px; letter-spacing: 2px; border-bottom: 3px solid #c9a961; padding-bottom: 10px; }
+            h1 { color: #1b2a4a; font-size: 28px; letter-spacing: 2px; border-bottom: 3px solid #c9a961; padding-bottom: 10px; text-align: center; }
             h2 { color: #1b2a4a; border-left: 4px solid #c9a961; padding-left: 12px; border-bottom: none; margin-top: 24px; font-size: 18px; }
             h3 { color: #2c3e50; font-size: 15px; }
             p, li { color: #3d3d3d; }
