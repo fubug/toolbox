@@ -452,6 +452,10 @@ class ResumeApp {
             // 确保依赖已加载
             await this.loadDeps();
 
+            // 保存当前滚动位置，导出前滚到顶部避免 html2canvas 偏移问题
+            const savedScrollY = window.scrollY;
+            window.scrollTo(0, 0);
+
             // 创建一个临时容器用于 PDF 生成（确保 A4 尺寸）
             const tempContainer = document.createElement('div');
             tempContainer.innerHTML = this.previewContainer.innerHTML;
@@ -500,6 +504,7 @@ class ResumeApp {
             console.error('PDF 导出失败:', error);
             showError('PDF 导出失败：' + error.message);
         } finally {
+            window.scrollTo(0, savedScrollY);
             showLoading(false);
         }
     }
